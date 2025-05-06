@@ -1,6 +1,31 @@
-name: Post welcome comment
+# .github/workflows/welcome.yml
+
+name: Welcome Workflow   # ← Required “name:” field
+
 on:
   pull_request:
-    types: [opened]
+    types: [opened]      # Trigger when a PR is opened
+
 permissions:
-  pull-requests: write
+  pull-requests: write   # Allow writing PR comments
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Post welcome comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request.number;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: pr,
+              body: `👋 Welcome @${context.actor}! Thanks for your contribution.`
+            });
